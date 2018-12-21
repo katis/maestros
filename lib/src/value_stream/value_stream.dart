@@ -1,4 +1,3 @@
-
 import 'package:rxdart/rxdart.dart';
 
 mixin ValueObservableMixin<A> on ValueObservable<A> {
