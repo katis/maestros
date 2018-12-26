@@ -1,9 +1,10 @@
 import 'package:maestros/src/model/download_status.dart';
 import 'package:maestros/src/value_stream/value_stream.dart';
+import 'package:rxdart/rxdart.dart';
 
 class Download {
   Download(this._initial)
-      : _updates = ValueSubject<DownloadUpdate>(seedValue: _initial);
+      : _updates = BehaviorSubject<DownloadStatus>(seedValue: _initial);
 
   final DownloadStatus _initial;
 
@@ -13,24 +14,54 @@ class Download {
 
   int get totalLength => _initial.totalLength;
 
-  final ValueSubject<DownloadUpdate> _updates;
+  final BehaviorSubject<bool> selected =
+      BehaviorSubject<bool>(seedValue: false);
 
-  ValueStream<DownloadUpdate> get updates => _updates;
+  final BehaviorSubject<DownloadStatus> _updates;
 
-  ValueStream<Status> get status => _updates.map((update) => update.status);
+  ValueObservable<DownloadStatus> get updates => _updates;
 
-  ValueStream<int> get completedLength =>
-      _updates.map((update) => update.completedLength);
+  ValueObservable<Status> get status => _mapUpdates((update) => update.status);
 
-  ValueStream<int> get uploadLength =>
-      _updates.map((update) => update.uploadLength);
+  ValueObservable<Status> get newStatus =>
+      _mapUpdates((update) => update.status).shareValue();
 
-  ValueStream<DownloadError> get error => _updates
-      .map((update) => DownloadError(update.errorCode, update.errorMessage));
+  ValueObservable<int> get completedLength =>
+      _mapUpdates((update) => update.completedLength);
+
+  ValueObservable<int> get uploadLength =>
+      _mapUpdates((update) => update.uploadLength);
+
+  ValueObservable<int> get downloadSpeed =>
+      _mapUpdates((update) => update.downloadSpeed);
+
+  ValueObservable<Progress> get progress => _mapUpdates((update) {
+        final donePct =
+            update.completedLength.toDouble() / totalLength.toDouble();
+        final velocityPct =
+            update.downloadSpeed.toDouble() / totalLength.toDouble();
+        return Progress(donePct, velocityPct);
+      });
+
+  ValueObservable<int> get uploadSpeed =>
+      _mapUpdates((update) => update.uploadSpeed);
+
+  ValueObservable<T> _mapUpdates<T>(T Function(DownloadStatus) mapper) =>
+      mapValue(_updates, mapper);
+
+  ValueObservable<DownloadError> get error => mapValue(
+      _updates,
+      (DownloadStatus update) =>
+          DownloadError(update.errorCode, update.errorMessage));
 
   void update(DownloadStatus status) => _updates.add(status);
 
-  Future close() => _updates.close();
+  Future close() {
+    return Future.wait([_updates.close(), selected.close()]);
+  }
+
+  @override
+  String toString() => 'Download(gid: $gid, name: $name)';
 }
 
 class DownloadError {
@@ -38,4 +69,11 @@ class DownloadError {
   final String message;
 
   DownloadError(this.code, this.message);
+}
+
+class Progress {
+  final double donePct;
+  final double velocityPct;
+
+  Progress(this.donePct, this.velocityPct);
 }

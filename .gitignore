@@ -10,6 +10,11 @@
 .history
 .svn/
 
+# Torrent stuff
+*.torrent
+*.aria2
+*.iso
+
 # IntelliJ related
 *.iml
 *.ipr

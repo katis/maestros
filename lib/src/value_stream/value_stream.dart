@@ -1,20 +1,24 @@
+import 'package:flutter/widgets.dart';
 import 'package:rxdart/rxdart.dart';
 
-mixin ValueObservableMixin<A> on ValueObservable<A> {
-  ValueConnectableStream<B> mapValue<B>(B Function(A) mapper) =>
-      ValueConnectableStream(map(mapper), seedValue: mapper(value));
+ValueObservable<B> mapValue<A, B>(
+        ValueObservable<A> observable, B Function(A) mapper) =>
+    observable.map(mapper).shareValue(seedValue: mapper(observable.value));
 
-  ValueStream<C> combineLatest<B, C>(
-          ValueObservable<B> other, C Function(A, B) combine) =>
-      ValueConnectableStream(withLatestFrom(other, combine),
-          seedValue: combine(value, other.value));
+ValueObservable<C> combine2<A, B, C>(ValueObservable<A> left,
+        ValueObservable<B> right, C Function(A, B) combiner) =>
+    left
+        .withLatestFrom(right, combiner)
+        .shareValue(seedValue: combiner(left.value, right.value));
+
+class ValueObservableBuilder<A> extends StreamBuilder<A> {
+  ValueObservableBuilder(
+      {Key key,
+      @required ValueObservable<A> observable,
+      @required AsyncWidgetBuilder<A> builder})
+      : super(
+            key: key,
+            initialData: observable.value,
+            stream: observable,
+            builder: builder);
 }
-
-abstract class ValueStream<T>
-    implements ValueObservable<T>, ValueObservableMixin<T> {}
-
-class ValueSubject<T> = BehaviorSubject<T>
-    with ValueStream<T>, ValueObservableMixin<T>;
-
-class ValueConnectableStream<T> = ValueConnectableObservable<T>
-    with ValueStream<T>, ValueObservableMixin<T>;

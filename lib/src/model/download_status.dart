@@ -7,8 +7,11 @@ class Gid {
 
   final String string;
 
-  bool operator ==(o) => o is Gid && o.string == string;
+  bool operator ==(Object o) => o is Gid && o.string == string;
   int get hashCode => string.hashCode;
+
+  @override
+  String toString() => 'Gid($string)';
 }
 
 class _GidConverter implements JsonConverter<Gid, String> {
@@ -23,35 +26,15 @@ class _GidConverter implements JsonConverter<Gid, String> {
 
 @JsonSerializable(createToJson: false)
 @_GidConverter()
-class DownloadUpdate {
-  final Gid gid;
-  final Status status;
-  final int uploadLength;
-  final int completedLength;
-  final ErrorCode errorCode;
-  final String errorMessage;
-
-  DownloadUpdate(
-      {this.gid,
-      this.status,
-      this.uploadLength,
-      this.completedLength,
-      this.errorCode,
-      this.errorMessage});
-
-  factory DownloadUpdate.fromJson(Map<String, dynamic> json) =>
-      _$DownloadUpdateFromJson(json);
-}
-
-@JsonSerializable(createToJson: false)
-@_GidConverter()
-class DownloadStatus implements DownloadUpdate {
+class DownloadStatus {
   DownloadStatus(
       {this.gid,
       this.status,
       this.completedLength,
       this.uploadLength,
       this.totalLength,
+      this.downloadSpeed,
+      this.uploadSpeed,
       this.errorCode,
       this.errorMessage,
       this.bittorrent,
@@ -64,6 +47,10 @@ class DownloadStatus implements DownloadUpdate {
   final int uploadLength;
   @JsonKey(fromJson: int.tryParse)
   final int totalLength;
+  @JsonKey(fromJson: int.tryParse)
+  final int downloadSpeed;
+  @JsonKey(fromJson: int.tryParse)
+  final int uploadSpeed;
   final Status status;
   final ErrorCode errorCode;
   final String errorMessage;
@@ -174,15 +161,15 @@ NotificationKind stringToNotificationKind(String json) {
   return mapping[json];
 }
 
-class Notification {
+class Aria2Notification {
   final NotificationKind kind;
   final Gid gid;
 
-  Notification({this.kind, this.gid});
+  Aria2Notification({this.kind, this.gid});
 
-  factory Notification.fromJson(Map<String, dynamic> json) {
+  factory Aria2Notification.fromJson(Map<String, dynamic> json) {
     final kind = stringToNotificationKind(json['method']);
     final event = json['params'][0];
-    return Notification(kind: kind, gid: Gid(event['gid']));
+    return Aria2Notification(kind: kind, gid: Gid(event['gid']));
   }
 }

@@ -6,16 +6,38 @@ part of 'download_status.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-DownloadUpdate _$DownloadUpdateFromJson(Map<String, dynamic> json) {
-  return DownloadUpdate(
+DownloadStatus _$DownloadStatusFromJson(Map<String, dynamic> json) {
+  return DownloadStatus(
       gid: json['gid'] == null
           ? null
           : const _GidConverter().fromJson(json['gid'] as String),
       status: _$enumDecodeNullable(_$StatusEnumMap, json['status']),
-      uploadLength: json['uploadLength'] as int,
-      completedLength: json['completedLength'] as int,
+      completedLength: json['completedLength'] == null
+          ? null
+          : int.tryParse(json['completedLength'] as String),
+      uploadLength: json['uploadLength'] == null
+          ? null
+          : int.tryParse(json['uploadLength'] as String),
+      totalLength: json['totalLength'] == null
+          ? null
+          : int.tryParse(json['totalLength'] as String),
+      downloadSpeed: json['downloadSpeed'] == null
+          ? null
+          : int.tryParse(json['downloadSpeed'] as String),
+      uploadSpeed: json['uploadSpeed'] == null
+          ? null
+          : int.tryParse(json['uploadSpeed'] as String),
       errorCode: _$enumDecodeNullable(_$ErrorCodeEnumMap, json['errorCode']),
-      errorMessage: json['errorMessage'] as String);
+      errorMessage: json['errorMessage'] as String,
+      bittorrent: json['bittorrent'] == null
+          ? null
+          : BittorrentStatus.fromJson(
+              json['bittorrent'] as Map<String, dynamic>),
+      files: (json['files'] as List)
+          ?.map((e) => e == null
+              ? null
+              : DownloadFile.fromJson(e as Map<String, dynamic>))
+          ?.toList());
 }
 
 T _$enumDecode<T>(Map<T, dynamic> enumValues, dynamic source) {
@@ -81,34 +103,6 @@ const _$ErrorCodeEnumMap = <ErrorCode, dynamic>{
   ErrorCode.reserved: 'reserved',
   ErrorCode.checksumValidationFailed: 'checksumValidationFailed'
 };
-
-DownloadStatus _$DownloadStatusFromJson(Map<String, dynamic> json) {
-  return DownloadStatus(
-      gid: json['gid'] == null
-          ? null
-          : const _GidConverter().fromJson(json['gid'] as String),
-      status: _$enumDecodeNullable(_$StatusEnumMap, json['status']),
-      completedLength: json['completedLength'] == null
-          ? null
-          : int.tryParse(json['completedLength'] as String),
-      uploadLength: json['uploadLength'] == null
-          ? null
-          : int.tryParse(json['uploadLength'] as String),
-      totalLength: json['totalLength'] == null
-          ? null
-          : int.tryParse(json['totalLength'] as String),
-      errorCode: _$enumDecodeNullable(_$ErrorCodeEnumMap, json['errorCode']),
-      errorMessage: json['errorMessage'] as String,
-      bittorrent: json['bittorrent'] == null
-          ? null
-          : BittorrentStatus.fromJson(
-              json['bittorrent'] as Map<String, dynamic>),
-      files: (json['files'] as List)
-          ?.map((e) => e == null
-              ? null
-              : DownloadFile.fromJson(e as Map<String, dynamic>))
-          ?.toList());
-}
 
 DownloadFile _$DownloadFileFromJson(Map<String, dynamic> json) {
   return DownloadFile(
