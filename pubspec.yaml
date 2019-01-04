@@ -25,6 +25,8 @@ dependencies:
   web_socket_channel: ^1.0.9
   json_rpc_2: ^2.0.9
   rxdart: ^0.20.0
+  mobx: ^0.0.11
+  collection: ^1.14.11
   connectivity: ^0.3.2
 
 dev_dependencies:

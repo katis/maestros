@@ -17,7 +17,7 @@ class DownloadList extends StatelessWidget {
       BuildContext context, AsyncSnapshot<BuiltMap<Gid, Download>> snapshot) {
     final downloads = snapshot.data.values.toList();
     return ListView.builder(
-      padding: EdgeInsets.only(top: 8.0, right: 8.0, bottom: 8.0),
+      padding: EdgeInsets.only(top: 8.0, left: 8.0, bottom: 8.0),
       itemCount: downloads.length,
       itemBuilder: (context, index) =>
           DownloadListItem(download: downloads[index]),
@@ -36,7 +36,6 @@ class DownloadListItem extends StatelessWidget {
       padding: const EdgeInsets.only(bottom: 6.0),
       child: Row(
         children: <Widget>[
-          ItemCheckbox(download: download),
           Expanded(
             child: Stack(
               children: <Widget>[
@@ -55,6 +54,7 @@ class DownloadListItem extends StatelessWidget {
               ],
             ),
           ),
+          ItemCheckbox(download: download),
         ],
       ),
     );
